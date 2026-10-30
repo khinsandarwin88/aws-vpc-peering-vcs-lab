@@ -1,22 +1,22 @@
 # Multi-Workspace VPC Peering Lab with HCP Terraform, OPA, and GitHub Branches
 
-Welcome to our Terraform project! This lab demonstrates how to manage a multi-tier AWS network using **HCP Terraform**, **Open Policy Agent (OPA)** for security, and a **Branch-per-Workspace** workflow in GitHub.
+Welcome to Terraform project! This lab demonstrates how to manage a multi-tier AWS network using **HCP Terraform**, **Open Policy Agent (OPA)** for security, and a **Branch-per-Workspace** workflow in GitHub.
 
 ---
 
 ## 1. Project Overview & Architecture
 
-We have set up two isolated AWS VPCs connected securely through VPC Peering in the `eu-west-1` region:
+Setting up two isolated AWS VPCs connected securely through VPC Peering in the `eu-west-1` region:
 * **Frontend VPC:** `10.0.0.0/16`
 * **Backend VPC:** `192.168.0.0/16`
 
-Instead of keeping everything in one single branch, we use a **Branch-per-Workspace** approach where each HCP Terraform workspace is linked to its own specific Git branch.
+Instead of keeping everything in one single branch, I use a **Branch-per-Workspace** approach where each HCP Terraform workspace is linked to its own specific Git branch.
 
 ---
 
 ## 2. Workspace & Branch Mapping
 
-Here is how our workspaces are connected to GitHub branches and directories:
+Here is how workspaces are connected to GitHub branches and directories:
 
 | Order | Workspace Name | GitHub Branch | Directory | What it deploys |
 | :--- | :--- | :--- | :--- | :--- |
@@ -31,7 +31,7 @@ Here is how our workspaces are connected to GitHub branches and directories:
 
 ## 3. Security & Policy as Code (OPA)
 
-To keep our infrastructure safe, we integrated **Open Policy Agent (OPA)** rules:
+To keep infrastructure safe, I integrated **Open Policy Agent (OPA)** rules:
 * **No Public SSH:** Blocking `0.0.0.0/0` ingress on Port 22.
 * **Subnet Limits:** Keeping the subnet counts safe and controlled.
 * **Guardrail Enforcement:** If a rule is violated (like opening SSH to the internet), HCP Terraform will automatically fail the plan step and block the deployment.

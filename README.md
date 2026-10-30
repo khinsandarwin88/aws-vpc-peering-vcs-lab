@@ -32,12 +32,13 @@ To maintain strict isolation and independent state management, individual Git br
 
 ### Step 1: Clone the Repository
 Begin by cloning the repository to your local development environment:
+
 ```bash
 git clone [https://github.com/khinsandarwin88/aws-vpc-peering-vcs-lab.git](https://github.com/khinsandarwin88/aws-vpc-peering-vcs-lab.git)
 cd aws-vpc-peering-vcs-lab
 
 
-Step 2: Create and Push Component Branches
+### Step 2: Create and Push Component Branches
 Create dedicated branches for each component to maintain the Branch-per-Workspace workflow:
 
 Bash
@@ -51,12 +52,12 @@ Create or select your project and set up 6 individual workspaces matching your c
 
 For each workspace, navigate to Settings -> Version Control to bind your GitHub repository, VCS branch, and working directory.
 
-Step 4: Enforce OPA Policies
+### Step 4: Enforce OPA Policies
 Define your OPA Rego security policies within HCP Terraform under organization-managed policies.
 
 Set the enforcement behavior to Mandatory and attach them to the relevant workspaces.
 
-Step 5: Execute the GitOps Deployment Workflow
+### Step 5: Execute the GitOps Deployment Workflow
 Make necessary infrastructure code modifications inside a specific component directory.
 
 Commit and push your code updates to the designated feature branch.

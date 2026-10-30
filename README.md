@@ -1,73 +1,12 @@
-# Multi-Workspace VPC Peering Lab with HCP Terraform, OPA, and GitHub Branches
+AWS VPC Peering & HCP Terraform VCS-Driven Lab Report1. Executive SummaryThis project demonstrates an enterprise-grade Infrastructure-as-Code (IaC) deployment of an intra-region AWS VPC Peering architecture in eu-west-1 (Ireland). It utilizes a GitOps workflow powered by HCP Terraform VCS-driven runs, a Branch-per-Workspace strategy in a monorepo, OIDC dynamic credentials, AWS Secrets Manager for ephemeral SSH key management, and Open Policy Agent (OPA) for automated compliance enforcement.2. Architecture & ComponentsCloud Provider: Amazon Web Services (AWS)   Region: eu-west-1 (Ireland)   Frontend VPC: 10.0.0.0/16 (Public subnets, NAT gateway, bastion host, and private subnets)   Backend VPC: 192.168.0.0/16 (Private subnets and peered route connections)   Orchestration: HCP Terraform Workspaces linked via VCS   Security & Governance: AWS IAM OIDC, AWS Secrets Manager, and OPA (Open Policy Agent)3. Branch-per-Workspace Strategy & Monorepo MappingTo maintain strict isolation and independent state management, individual Git branches map directly to designated HCP Terraform workspaces and working directories:Workspace NameWorking DirectoryAssociated Git BranchPurpose & Managed Resourcesfe-network-ws   fe-network   fe-network   Frontend VPC, subnets, Internet Gateway, NAT Gateway, Route Tables   be-network-ws   be-network   be-networkBackend VPC, subnets, IGW, NAT, and VPC Peering connection   fe-security-ws   fe-security   fe-securityFrontend Security Groups and inbound/outbound rules   be-security-ws   be-security   be-securityBackend Security Groups and cross-VPC security rules   fe-compute-ws   fe-compute   fe-computeFrontend EC2 instances, public bastion, and ephemeral SSH key binding   be-compute-ws   be-compute   be-computeBackend private EC2 instances and ephemeral SSH key binding   4. Security ImplementationNo Static Credentials: Authentication to AWS is handled via OIDC dynamic credentials, entirely eliminating long-lived static AWS access keys.Ephemeral Secrets: SSH private keys are securely generated, stored in AWS Secrets Manager, and read ephemerally solely during instance provisioning.Policy as Code (OPA): Open Policy Agent enforces mandatory rules (e.g., blocking public ingress 0.0.0.0/0 on private security groups) to fail and block non-compliant Terraform plans automatically.5. Step-by-Step Operating Procedures (SOP)Step 1: Clone the RepositoryBegin by cloning the repository to your local development environment:Bashgit clone https://github.com/khinsandarwin88/aws-vpc-peering-vcs-lab.git
+cd aws-vpc-peering-vcs-lab
+Step 2: Create and Push Component BranchesCreate dedicated branches for each component to maintain the Branch-per-Workspace workflow:Bash# Example for frontend network component
+git checkout main
+git checkout -b fe-network
+git push origin fe-network
 
-Welcome to Terraform project! This lab demonstrates how to manage a multi-tier AWS network using **HCP Terraform**, **Open Policy Agent (OPA)** for security, and a **Branch-per-Workspace** workflow in GitHub.
-
----
-
-## 1. Project Overview & Architecture
-
-Setting up two isolated AWS VPCs connected securely through VPC Peering in the `eu-west-1` region:
-* **Frontend VPC:** `10.0.0.0/16`
-* **Backend VPC:** `192.168.0.0/16`
-
-Instead of keeping everything in one single branch, I use a **Branch-per-Workspace** approach where each HCP Terraform workspace is linked to its own specific Git branch.
-
----
-
-## 2. Workspace & Branch Mapping
-
-Here is how workspaces are connected to GitHub branches and directories:
-
-| Order | Workspace Name | GitHub Branch | Directory | What it deploys |
-| :--- | :--- | :--- | :--- | :--- |
-| 1 | `fe-network-ws` | `fe-network` | `fe-network/` | Frontend VPC, Subnets, IGW, NAT |
-| 2 | `be-network-ws` | `be-network` | `be-network/` | Backend VPC, Subnets, Peering |
-| 3 | `fe-security-ws` | `fe-security` | `fe-security/` | Frontend Security Groups |
-| 4 | `be-security-ws` | `be-security` | `be-security/` | Backend Security Groups + Cross-VPC rules |
-| 5 | `fe-compute-ws` | `fe-compute` | `fe-compute/` | Frontend Bastion and Private Instances |
-| 6 | `be-compute-ws` | `be-compute` | `be-compute/` | Backend Private Instances |
-
----
-
-## 3. Security & Policy as Code (OPA)
-
-To keep infrastructure safe, I integrated **Open Policy Agent (OPA)** rules:
-* **No Public SSH:** Blocking `0.0.0.0/0` ingress on Port 22.
-* **Subnet Limits:** Keeping the subnet counts safe and controlled.
-* **Guardrail Enforcement:** If a rule is violated (like opening SSH to the internet), HCP Terraform will automatically fail the plan step and block the deployment.
-
----
-
-## 4. Step-by-Step Workflow Guide
-
-To make changes or test this project, follow these simple steps:
-
-1. **Switch to your component branch:**
-   ```bash
-   git checkout fe-network
-   ```
-2. **Make your changes** inside the respective folder (e.g., `fe-network/`).
-3. **Add and commit your changes:**
-   ```bash
-   git add fe-network/
-   git commit -m "Update frontend network settings"
-   ```
-4. **Push to GitHub:**
-   ```bash
-   git origin fe-network
-   ```
-5. **Check HCP Terraform:** 
-   * Go to your HCP Terraform dashboard.
-   * Open `fe-network-ws` to see the automated plan, OPA check, and apply your changes.
-
----
-
-## 5. Clean Up (Destroy Order)
-
-When you are finished with the lab, destroy your resources in reverse order to avoid dependency errors:
-1. `be-compute-ws`
-2. `fe-compute-ws`
-3. `be-security-ws`
-4. `fe-security-ws`
-5. `be-network-ws`
-6. `fe-network-ws`
+# Repeat the process for other components (be-network, fe-security, be-security, fe-compute, be-compute)
+Step 3: Configure HCP Terraform WorkspacesLog in to the HCP Terraform Dashboard.Create or select your project and set up 6 individual workspaces matching your components.For each workspace, navigate to Settings -> Version Control:Connect your GitHub repository.Bind the respective VCS Branch (e.g., fe-network).   Set the Terraform Working Directory (e.g., fe-network).   Configure path-based execution triggers (e.g., fe-network/**/*) to restrict runs to relevant file modifications.Step 4: Enforce OPA PoliciesDefine your OPA Rego security policies within HCP Terraform under organization-managed policies.Set the enforcement behavior to Mandatory.Attach the policy set to security and network workspaces to automatically validate resource changes during planning phases.Step 5: Execute the GitOps Deployment WorkflowMake necessary infrastructure code modifications inside a specific component directory (e.g., fe-network/).Stage, commit, and push your code updates to the designated feature branch:Bashgit add fe-network/
+git commit -m "Update frontend network and subnet configuration"
+git push origin fe-network
+Open a Pull Request targeting the main branch.Review the automated HCP Terraform Speculative Plan and OPA compliance scan results directly inside the PR checks.Merge the pull request into main to trigger the final remote HCP Terraform execution and apply changes to AWS.
